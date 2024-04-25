@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chat-app">
+        <h1>Chat App</h1> 
+        <div id="messages-container">
+            <div id="messages"></div> <!-- Messages container -->
+        </div> 
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="Type your message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+        var socket = io();
+        socket.emit('read-all')
+        
+        socket.on('all-messages', function(data) {
+            var messagesContainer = document.getElementById('messages-container')
+            var messagesDiv = document.getElementById('messages');
+            for (let i = 0; i < data.length; i++) {
+                messagesDiv.innerHTML += '<p><strong>' + data[i].username + ':</strong> ' + data[i].message + '</p>';
+            }
+            // Scroll to the bottom of the messages container
+            messagesContainer.scrollTop = messagesContainer.scrollHeight
+        })
+        // Send message to the server
+        function sendMessage() {
+            var message = document.getElementById('message-input').value;
+            if (message){
+                socket.emit('message', message);
+            }
+        }
+    
+        // Receive message from the server
+        socket.on('message', function(data) {
+            var messagesContainer = document.getElementById('messages-container')
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<p><strong>' + data.username + ':</strong> ' + data.message + '</p>';
+            // Scroll to the bottom of the messages container
+            messagesContainer.scrollTop = messagesContainer.scrollHeight
+        });
+
+        // Add event listener for form submission
+        document.getElementById('message-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+            sendMessage(); // Call the function to send the message
+            document.getElementById('message-input').value = ''; // Clear the input field after sending
+        });
+    </script>
+</body>
+    
+    
+    <!-- <script>
+        const form = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const messagesDiv = document.getElementById('messages');
+        const username = "{{ username }}"; // Fetch authenticated username from server-side template
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const message = messageInput.value;
+            sendMessage(username, message); // Pass username along with the message
+            messageInput.value = ''; // Clear input field after sending
+        });
+
+        function sendMessage(username, message) {
+            fetch('/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: message, // Include username in the message payload
+            })
+            .then(response => response.text())
+            .then(data => console.log(data)) // Handle response if needed
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getMessages() {
+            fetch('/receive-messages')
+            .then(response => response.json())
+            .then(data => {
+                messagesDiv.innerHTML = '';
+                data.messages.forEach(message => {
+                    messagesDiv.innerHTML += `<p><strong>${message.username}:</strong> ${message.message}</p>`; // Display username along with the message
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // // Fetch messages initially when the page loads
+        // getMessages();
+
+        // // Fetch messages every few seconds (you can adjust the interval)
+        // setInterval(getMessages, 2500); // Fetch messages every x seconds -->
+    </script>
+</body>
+</html>
