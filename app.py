@@ -48,21 +48,6 @@ oauth.register(
     }
 )
 
-# Google OAuth configuration
-#google = oauth.init_app(
-#    'google',
-#    consumer_key='927822979225-o5t866fk5o1e06duvdn0fhg7irvhj5ee.apps.googleusercontent.com',
-#    consumer_secret='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',
-#    request_token_params={
-#        'scope': 'email',
-#    },
-#    base_url='https://www.googleapis.com/oauth2/v1/',
-#    request_token_url=None,
-#    access_token_method='POST',
-#    access_token_url='https://accounts.google.com/o/oauth2/token',
-#    authorize_url='https://accounts.google.com/o/oauth2/auth',
-
-
 # OAuth login route
 @app.route('/login')
 def login():
